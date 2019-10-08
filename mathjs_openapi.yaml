@@ -1,0 +1,80 @@
+openapi: 3.0.1
+info:
+  title: math.js web service
+  description: '[math.js](math.js) is available as a RESTful API. Evaluations can
+    be done via [GET](https://api.mathjs.org/#get) or [POST](https://api.mathjs.org/#post)
+    requests. The duration per evaluation of this free service is limited to 10 seconds. '
+  version: 1.0.0
+servers:
+- url: http://api.mathjs.org/v4
+paths:
+  /:
+    get:
+      summary: Calculate given expression with GET
+      description: Calculate expression given in a query parameter
+      parameters:
+      - name: expr
+        in: query
+        description: The expression to be evaluated. The expression must be [url encoded](http://www.w3schools.com/tags/ref_urlencode.asp).
+        required: true
+        schema:
+          type: string
+      - name: precision
+        in: query
+        description: Number of significant digits in formatted output. Undefined by
+          default.
+        schema:
+          type: number
+      responses:
+        200:
+          description: Body contains the result of the expression
+        400:
+          description: Error message in the body
+    post:
+      summary: Calculate given expression with POST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request'
+      responses:
+        500:
+          description: "Internal Server Error"
+        default:
+          description: "On success, the field result contains a string with the results of the expression. If an array with expressions was provided, the result will be a an array with a string for each expression. On failure, result will be null. On failure, error will contain an error message. On success, error will be null. "
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+components:
+  schemas:
+    Response:
+      type: object
+      properties:
+        result:
+          example: "2137"
+          type: string
+          nullable: true
+        error:
+          example: null
+          type: string
+          nullable: true
+    Request:
+      type: object
+      description: "The request body must contain a JSON Object with the following fields"
+      required: 
+        - expr
+      properties:
+        expr:
+          description: A string containing the expression to be evaluated, or an array with strings to be evaluated
+          oneOf:
+            - type: string
+              nullable: true
+            - type: array
+              items:
+                type: string
+              
+        precision:
+          description: Number of significant digits in formatted output. Undefined by default.
+          type: integer
+
